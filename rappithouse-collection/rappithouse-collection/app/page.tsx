@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Flower2,
   Search,
@@ -15,132 +15,171 @@ import {
   SlidersHorizontal,
   Trash2,
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
-type Member = { id: string; name: string; role: string };
-type Flower = { id: string; name: string; type: string; color: string; image: string; open?: boolean };
-
-const members: Member[] = [
-  { id: 'be-tho', name: 'RH •「Bé Thỏ」', role: 'Hội Trưởng' },
-  { id: 'zoi', name: 'RH •「Zoi」', role: 'Tinh Anh' },
-  { id: 'tuyet-nha', name: 'RH •「Tuyết Nhã」', role: 'Tinh Anh' },
-  { id: 'uniii', name: 'RH •「Uniii」', role: 'Thành viên' },
-  { id: 'nana', name: 'RH •「Nana Cute」', role: 'Thành viên' },
-  { id: 'nhu', name: 'RH •「Như Ýiee96」', role: 'Thành viên' },
-  { id: 'tieu-mieu', name: 'RH •「Tiểu Miêu」', role: 'Thành viên' },
-  { id: 'doa-nhi', name: 'RH •「Đóa Nhi」', role: 'Thành viên' },
-  { id: 'moc-nhi', name: 'RH •「Mộc Nhi」', role: 'Thành viên' },
-  { id: 'coca', name: 'RH •「Coca」', role: 'Thành viên' },
-  { id: 'miu', name: 'RH •「Miu」', role: 'Thành viên' },
-  { id: 'bun', name: 'RH •「Bún」', role: 'Thành viên' },
-  { id: 'susu', name: 'RH •「Susu」', role: 'Thành viên' },
-  { id: 'mimi', name: 'RH •「Mimi」', role: 'Thành viên' },
-  { id: 'gumi', name: 'RH •「Gumi」', role: 'Thành viên' },
-  { id: 'bong', name: 'RH •「Bông」', role: 'Thành viên' },
-  { id: 'meo', name: 'RH •「Mèo」', role: 'Thành viên' },
-  { id: 'kem', name: 'RH •「Kem」', role: 'Thành viên' },
-  { id: 'sam', name: 'RH •「Sam」', role: 'Thành viên' },
-  { id: 'moon', name: 'RH •「Moon」', role: 'Thành viên' },
-  { id: 'sun', name: 'RH •「Sun」', role: 'Thành viên' },
-  { id: 'hana', name: 'RH •「Hana」', role: 'Thành viên' },
-  { id: 'rin', name: 'RH •「Rin」', role: 'Thành viên' },
-  { id: 'miya', name: 'RH •「Miya」', role: 'Thành viên' },
-  { id: 'chou', name: 'RH •「Chou」', role: 'Thành viên' },
-  { id: 'rinny', name: 'RH •「Rinny」', role: 'Thành viên' },
-  { id: 'pupu', name: 'RH •「Pupu」', role: 'Thành viên' },
-  { id: 'lala', name: 'RH •「Lala」', role: 'Thành viên' },
-  { id: 'bibi', name: 'RH •「Bibi」', role: 'Thành viên' },
-  { id: 'kiki', name: 'RH •「Kiki」', role: 'Thành viên' },
-  { id: 'lili', name: 'RH •「Lili」', role: 'Thành viên' },
-  { id: 'nini', name: 'RH •「Nini」', role: 'Thành viên' },
-  { id: 'toto', name: 'RH •「Toto」', role: 'Thành viên' },
-  { id: 'yuki', name: 'RH •「Yuki」', role: 'Thành viên' },
-];
-
-const flowers: Flower[] = [
-  { id: 'chep-vang', name: 'CHÉP VÀNG VƯỢT SÓNG', type: 'ĐỎ', color: 'Đỏ', image: '🐠', open: true },
-  { id: 'thien-cung', name: 'THIÊN CUNG', type: 'ĐỎ', color: 'Đỏ', image: '🏯', open: true },
-  { id: 'ngan-ha', name: 'NGÂN HÀ CHIẾU NHUY', type: 'ĐỎ', color: 'Tím', image: '✿', open: true },
-  { id: 'ba-ba-hong-nhat', name: 'BÀ BÀ NA HỒNG NHẠT', type: 'XANH DƯƠNG', color: 'Xanh dương', image: '🌸' },
-  { id: 'ba-ba-trang-suong', name: 'BÀ BÀ NA TRẮNG SƯƠNG', type: 'XANH DƯƠNG', color: 'Xanh dương', image: '🌼' },
-  { id: 'bach-hop-hong', name: 'BÁCH HỢP HỒNG', type: 'XANH LÁ', color: 'Xanh lá', image: '🌷' },
-  { id: 'mau-don-do', name: 'MẪU ĐƠN ĐỎ', type: 'ĐỎ', color: 'Đỏ', image: '🌺' },
-  { id: 'sen-vang', name: 'SEN VÀNG', type: 'VÀNG', color: 'Vàng', image: '🪷' },
-  { id: 'tu-dang', name: 'TỬ ĐẰNG', type: 'TÍM', color: 'Tím', image: '💜' },
-  { id: 'cam-tu-cau', name: 'CẨM TÚ CẦU', type: 'XANH DƯƠNG', color: 'Xanh dương', image: '💐' },
-  { id: 'hoa-anh-dao', name: 'HOA ANH ĐÀO', type: 'HỒNG', color: 'Hồng', image: '🌸' },
-  { id: 'huong-duong', name: 'HƯỚNG DƯƠNG', type: 'VÀNG', color: 'Vàng', image: '🌻' },
-];
-
-const seed: Record<string, string[]> = {
-  'be-tho': flowers.slice(0, 8).map((f) => f.id),
-  zoi: flowers.slice(1, 7).map((f) => f.id),
-  'tuyet-nha': flowers.slice(0, 6).map((f) => f.id),
-  uniii: ['thien-cung', 'ngan-ha', 'sen-vang'],
-  nana: ['ngan-ha', 'hoa-anh-dao'],
-  nhu: ['ngan-ha', 'bach-hop-hong'],
-  'tieu-mieu': ['ngan-ha', 'mau-don-do'],
-  'doa-nhi': ['ngan-ha', 'tu-dang'],
+type Member = {
+  id: number;
+  name: string;
+  email?: string | null;
+  role?: string | null;
 };
 
+type Flower = {
+  id: number;
+  name: string;
+  image_url?: string | null;
+  category?: string | null;
+  status?: string | null;
+};
+
+type Claim = {
+  id: number;
+  flower_id: number;
+  member_id: number;
+  note?: string | null;
+};
+
+type Tab = 'collection' | 'profile' | 'admin';
+
 export default function Home() {
-  const [tab, setTab] = useState<'collection' | 'profile' | 'admin'>('collection');
-  const [current, setCurrent] = useState('be-tho');
+  const [tab, setTab] = useState<Tab>('collection');
+  const [members, setMembers] = useState<Member[]>([]);
+  const [flowers, setFlowers] = useState<Flower[]>([]);
+  const [claims, setClaims] = useState<Claim[]>([]);
+  const [current, setCurrent] = useState<number | null>(null);
   const [query, setQuery] = useState('');
   const [type, setType] = useState('Tất cả loại');
-  const [data, setData] = useState<Record<string, string[]>>(seed);
-  const [list, setList] = useState<Flower[]>(flowers);
   const [newFlower, setNewFlower] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function loadData() {
+    if (!supabase) {
+      setError('Chưa cấu hình Supabase trong Vercel Environment Variables.');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const [membersRes, flowersRes, claimsRes] = await Promise.all([
+      supabase.from('members').select('id,name,email,role').order('id', { ascending: true }),
+      supabase.from('flowers').select('id,name,image_url,category,status').order('id', { ascending: true }),
+      supabase.from('flower_claims').select('id,flower_id,member_id,note').order('id', { ascending: true }),
+    ]);
+
+    if (membersRes.error || flowersRes.error || claimsRes.error) {
+      setError(
+        membersRes.error?.message || flowersRes.error?.message || claimsRes.error?.message || 'Không tải được dữ liệu.'
+      );
+      setLoading(false);
+      return;
+    }
+
+    const memberData = (membersRes.data || []) as Member[];
+    setMembers(memberData);
+    setFlowers((flowersRes.data || []) as Flower[]);
+    setClaims((claimsRes.data || []) as Claim[]);
+    setCurrent((old) => old ?? memberData[0]?.id ?? null);
+    setLoading(false);
+  }
 
   useEffect(() => {
-    const saved = localStorage.getItem('rh-data');
-    const savedFlowers = localStorage.getItem('rh-flowers');
-    if (saved) setData(JSON.parse(saved));
-    if (savedFlowers) setList(JSON.parse(savedFlowers));
+    loadData();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('rh-data', JSON.stringify(data));
-    localStorage.setItem('rh-flowers', JSON.stringify(list));
-  }, [data, list]);
+  const me = members.find((m) => m.id === current) || members[0];
+  const total = flowers.length;
+  const myClaims = claims.filter((c) => c.member_id === current);
+  const myFlowerIds = new Set(myClaims.map((c) => c.flower_id));
 
-  const me = members.find((m) => m.id === current) ?? members[0];
-  const filtered = list.filter(
-    (f) => (type === 'Tất cả loại' || f.type === type) && f.name.toLowerCase().includes(query.toLowerCase()),
-  );
-  const myIds = data[current] || [];
-  const owners = (flowerId: string) => members.filter((m) => (data[m.id] || []).includes(flowerId));
-  const ranking = useMemo(
-    () =>
-      members
-        .map((m) => ({
-          ...m,
-          count: (data[m.id] || []).length,
-          pct: Math.round((((data[m.id] || []).length || 0) / Math.max(list.length, 1)) * 100),
-        }))
-        .sort((a, b) => b.count - a.count),
-    [data, list.length],
-  );
+  const categories = useMemo(() => {
+    const arr = flowers.map((f) => f.category || 'Khác').filter(Boolean);
+    return ['Tất cả loại', ...Array.from(new Set(arr))];
+  }, [flowers]);
 
-  const toggleFlower = (id: string) => {
-    setData((d) => {
-      const has = (d[current] || []).includes(id);
-      return {
-        ...d,
-        [current]: has ? (d[current] || []).filter((x) => x !== id) : [...(d[current] || []), id],
-      };
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return flowers.filter((f) => {
+      const okType = type === 'Tất cả loại' || (f.category || 'Khác') === type;
+      const okSearch = !q || f.name.toLowerCase().includes(q);
+      return okType && okSearch;
     });
-  };
+  }, [flowers, query, type]);
 
-  const addFlower = () => {
-    if (!newFlower.trim()) return;
-    const id = newFlower
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-');
-    setList([...list, { id, name: newFlower.toUpperCase(), type: 'MỚI', color: 'Hồng', image: '✿', open: true }]);
+  const ranking = useMemo(() => {
+    return members
+      .map((m) => {
+        const count = claims.filter((c) => c.member_id === m.id).length;
+        const pct = total ? Math.round((count / total) * 100) : 0;
+        return { ...m, count, pct };
+      })
+      .sort((a, b) => b.count - a.count);
+  }, [members, claims, total]);
+
+  function ownersOf(flowerId: number) {
+    const ownerIds = new Set(claims.filter((c) => c.flower_id === flowerId).map((c) => c.member_id));
+    return members.filter((m) => ownerIds.has(m.id));
+  }
+
+  async function toggleFlower(flowerId: number) {
+    if (!supabase || !current) return;
+    const existed = claims.find((c) => c.member_id === current && c.flower_id === flowerId);
+
+    if (existed) {
+      const { error: deleteError } = await supabase.from('flower_claims').delete().eq('id', existed.id);
+      if (deleteError) {
+        alert(deleteError.message);
+        return;
+      }
+      setClaims((old) => old.filter((c) => c.id !== existed.id));
+      return;
+    }
+
+    const { data, error: insertError } = await supabase
+      .from('flower_claims')
+      .insert({ member_id: current, flower_id: flowerId, note: 'Đã có' })
+      .select('id,flower_id,member_id,note')
+      .single();
+
+    if (insertError) {
+      alert(insertError.message);
+      return;
+    }
+    setClaims((old) => [...old, data as Claim]);
+  }
+
+  async function addFlower() {
+    if (!supabase) return;
+    const name = newFlower.trim();
+    if (!name) return;
+    const nextId = Math.max(0, ...flowers.map((f) => f.id)) + 1;
+    const { data, error: insertError } = await supabase
+      .from('flowers')
+      .insert({ id: nextId, name: name.toUpperCase(), category: 'MỚI', status: null, image_url: null })
+      .select('id,name,image_url,category,status')
+      .single();
+
+    if (insertError) {
+      alert(insertError.message);
+      return;
+    }
+    setFlowers((old) => [...old, data as Flower]);
     setNewFlower('');
-  };
+  }
+
+  if (loading) {
+    return <main className="page"><h1>RAPPIT HOUSE</h1><p>Đang tải dữ liệu...</p></main>;
+  }
+
+  if (error) {
+    return <main className="page"><h1>RAPPIT HOUSE</h1><p className="note">Lỗi: {error}</p></main>;
+  }
+
+  if (!me) {
+    return <main className="page"><h1>RAPPIT HOUSE</h1><p>Chưa có thành viên.</p></main>;
+  }
 
   return (
     <main>
@@ -150,10 +189,10 @@ export default function Home() {
           <button className={tab === 'collection' ? 'active' : ''} onClick={() => setTab('collection')}><Flower2 /> Collection</button>
           <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}><UserRound /> Profile</button>
           <button className={tab === 'admin' ? 'active' : ''} onClick={() => setTab('admin')}><LayoutGrid /> Admin</button>
-          <select value={current} onChange={(e) => setCurrent(e.target.value)}>
+          <select value={current ?? ''} onChange={(e) => setCurrent(Number(e.target.value))}>
             {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
           </select>
-          <button onClick={() => setData(seed)}><RotateCcw /> Đổi/Reset</button>
+          <button onClick={loadData}><RotateCcw /> Tải lại</button>
         </div>
       </nav>
 
@@ -166,11 +205,19 @@ export default function Home() {
             </div>
             <button className="add" onClick={() => setTab('admin')}><Plus /> Thêm hoa</button>
           </header>
-          <Stats total={list.length} joined={members.length} mine={myIds.length} />
-          <Filters query={query} setQuery={setQuery} type={type} setType={setType} list={list} />
+
+          <Stats total={total} joined={members.length} mine={myFlowerIds.size} />
+          <Filters query={query} setQuery={setQuery} type={type} setType={setType} categories={categories} />
+
           <div className="grid">
             {filtered.map((f) => (
-              <FlowerCard key={f.id} f={f} mine={myIds.includes(f.id)} owners={owners(f.id)} toggle={() => toggleFlower(f.id)} />
+              <FlowerCard
+                key={f.id}
+                f={f}
+                mine={myFlowerIds.has(f.id)}
+                owners={ownersOf(f.id)}
+                toggle={() => toggleFlower(f.id)}
+              />
             ))}
           </div>
         </section>
@@ -181,33 +228,32 @@ export default function Home() {
           <div className="profile">
             <div className="avatar">{me.name.includes('Bé') ? 'BÉ' : 'RH'}</div>
             <div><h2>{me.name}</h2><span>{me.role}</span></div>
-            <div className="bigstat"><b>{myIds.length}</b><small>Hoa</small></div>
+            <div className="bigstat"><b>{myFlowerIds.size}</b><small>Hoa</small></div>
             <div className="bigstat"><b>#{ranking.findIndex((r) => r.id === current) + 1}</b><small>Hạng</small></div>
-            <div className="bigstat"><b>{Math.round((myIds.length / Math.max(list.length, 1)) * 100)}%</b><small>Đạt được</small></div>
+            <div className="bigstat"><b>{total ? Math.round((myFlowerIds.size / total) * 100) : 0}%</b><small>Đạt được</small></div>
             <label>Tiến trình sưu tập</label>
-            <div className="bar"><i style={{ width: `${(myIds.length / Math.max(list.length, 1)) * 100}%` }} /></div>
-            <p>{myIds.length} / {list.length} hoa</p>
+            <div className="bar"><i style={{ width: `${total ? (myFlowerIds.size / total) * 100 : 0}%` }} /></div>
+            <p>{myFlowerIds.size} / {total} hoa</p>
           </div>
 
           <div className="columns">
             <section>
-              <h2><Sparkles /> Hoa của tôi <small>{myIds.length}</small></h2>
-              {list.filter((f) => myIds.includes(f.id)).map((f) => (
+              <h2><Sparkles /> Hoa của tôi <small>{myFlowerIds.size}</small></h2>
+              {flowers.filter((f) => myFlowerIds.has(f.id)).map((f) => (
                 <div className="row" key={f.id}>
-                  <b>{f.image}</b>
-                  <span>{f.name}<em>{f.type} · Đã có</em></span>
+                  <b>{f.image_url ? <img src={f.image_url} alt="" /> : <Flower2 />}</b>
+                  <span>{f.name}<em>{f.category} · Đã có</em></span>
                   <button onClick={() => toggleFlower(f.id)}><Trash2 /> Xóa</button>
                 </div>
               ))}
             </section>
+
             <section>
               <h2><Trophy /> Bảng xếp hạng <small>{members.length}</small></h2>
               <div className="search"><Search /><input placeholder="Tìm thành viên..." value={query} onChange={(e) => setQuery(e.target.value)} /></div>
               {ranking.filter((r) => r.name.toLowerCase().includes(query.toLowerCase())).map((r, i) => (
                 <div className="rank" key={r.id}>
-                  <b>{i + 1}</b>
-                  <span>{r.name}<em>{r.role}</em></span>
-                  <strong>{r.count}<small>{r.pct}%</small></strong>
+                  <b>{i + 1}</b><span>{r.name}<em>{r.role}</em></span><strong>{r.count}<small>{r.pct}%</small></strong>
                 </div>
               ))}
             </section>
@@ -222,11 +268,11 @@ export default function Home() {
             <input placeholder="Nhập tên hoa mới..." value={newFlower} onChange={(e) => setNewFlower(e.target.value)} />
             <button onClick={addFlower}><Plus /> Thêm hoa</button>
           </div>
-          <p className="note">Bản này chạy được ngay bằng dữ liệu lưu trên trình duyệt. Khi kết nối Supabase, 34 thành viên có thể dùng chung dữ liệu online.</p>
-          {list.map((f) => (
+          <p className="note">Dữ liệu đang lấy trực tiếp từ Supabase. Khi thành viên tích/xóa hoa, dữ liệu sẽ cập nhật online.</p>
+          {flowers.map((f) => (
             <div className="row" key={f.id}>
-              <b>{f.image}</b>
-              <span>{f.name}<em>{owners(f.id).length} thành viên đang sở hữu</em></span>
+              <b>{f.image_url ? <img src={f.image_url} alt="" /> : <Flower2 />}</b>
+              <span>{f.name}<em>{ownersOf(f.id).length} thành viên đang sở hữu</em></span>
             </div>
           ))}
         </section>
@@ -245,21 +291,11 @@ function Stats({ total, joined, mine }: { total: number; joined: number; mine: n
   );
 }
 
-function Filters({ query, setQuery, type, setType, list }: any) {
-  const types = ['Tất cả loại', ...Array.from(new Set((list as Flower[]).map((f) => f.type)))] as string[];
-
+function Filters({ query, setQuery, type, setType, categories }: { query: string; setQuery: (v: string) => void; type: string; setType: (v: string) => void; categories: string[] }) {
   return (
     <div className="filters">
-      <div className="search">
-        <Search />
-        <input placeholder="Tìm hoa, xem ai đang sở hữu..." value={query} onChange={(e) => setQuery(e.target.value)} />
-      </div>
-      <div className="select">
-        <SlidersHorizontal />
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          {types.map((t) => <option key={t} value={t}>{t}</option>)}
-        </select>
-      </div>
+      <div className="search"><Search /><input placeholder="Tìm hoa, xem ai đang sở hữu..." value={query} onChange={(e) => setQuery(e.target.value)} /></div>
+      <div className="select"><SlidersHorizontal /><select value={type} onChange={(e) => setType(e.target.value)}>{categories.map((t) => <option key={t}>{t}</option>)}</select></div>
     </div>
   );
 }
@@ -267,19 +303,11 @@ function Filters({ query, setQuery, type, setType, list }: any) {
 function FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; owners: Member[]; toggle: () => void }) {
   return (
     <article className="card">
-      <div className="pic"><span>{f.image}</span><i>{f.type}</i></div>
+      <div className="pic">{f.image_url ? <img src={f.image_url} alt={f.name} /> : <span>{f.category === 'ĐỎ' ? '🌺' : '❀'}</span>}<i>{f.category || 'Khác'}</i></div>
       <h3>{f.name}</h3>
       <p><Users /> Thành viên ({owners.length})</p>
-      {owners.length ? (
-        <ul>
-          {owners.slice(0, 8).map((o) => <li key={o.id}>{o.name} <em>— Đã có</em></li>)}
-        </ul>
-      ) : (
-        <em>Chưa có thành viên</em>
-      )}
-      <button className={mine ? 'ok' : 'join'} onClick={toggle}>
-        {mine ? <><CheckCircle2 /> Đã tham gia / bấm để xóa</> : <><Users /> Tích hoa này</>}
-      </button>
+      {owners.length ? <ul>{owners.slice(0, 8).map((o) => <li key={o.id}>{o.name} <em>— Đã có</em></li>)}</ul> : <em>Chưa có thành viên</em>}
+      <button className={mine ? 'ok' : 'join'} onClick={toggle}>{mine ? <CheckCircle2 /> : <Users />} {mine ? 'Đã tham gia / bấm để xóa' : 'Tích hoa này'}</button>
     </article>
   );
 }
