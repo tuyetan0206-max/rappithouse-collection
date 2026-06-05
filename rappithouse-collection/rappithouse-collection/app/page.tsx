@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   SlidersHorizontal,
   Trash2,
+  ImagePlus,
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -50,6 +51,10 @@ export default function Home() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('Tất cả loại');
   const [newFlower, setNewFlower] = useState('');
+  const [newFlowerCategory, setNewFlowerCategory] = useState('MỚI');
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [newMemberRole, setNewMemberRole] = useState('Thành viên');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,6 +95,7 @@ export default function Home() {
   }, []);
 
   const me = members.find((m) => m.id === current) || members[0];
+  const isAdmin = me?.name?.includes('Bé Thỏ') || me?.id === 1;
   const total = flowers.length;
   const myClaims = claims.filter((c) => c.member_id === current);
   const myFlowerIds = new Set(myClaims.map((c) => c.flower_id));
@@ -151,22 +157,54 @@ export default function Home() {
   }
 
   async function addFlower() {
-    if (!supabase) return;
+    if (!supabase || !isAdmin) return;
     const name = newFlower.trim();
     if (!name) return;
     const nextId = Math.max(0, ...flowers.map((f) => f.id)) + 1;
     const { data, error: insertError } = await supabase
       .from('flowers')
-      .insert({ id: nextId, name: name.toUpperCase(), category: 'MỚI', status: null, image_url: null })
+      .insert({ id: nextId, name: name.toUpperCase(), category: newFlowerCategory || 'MỚI', status: null, image_url: null })
       .select('id,name,image_url,category,status')
       .single();
 
-    if (insertError) {
-      alert(insertError.message);
-      return;
-    }
+    if (insertError) return alert(insertError.message);
     setFlowers((old) => [...old, data as Flower]);
     setNewFlower('');
+  }
+
+  async function addMember() {
+    if (!supabase || !isAdmin) return;
+    const name = newMemberName.trim();
+    if (!name) return;
+    const nextId = Math.max(0, ...members.map((m) => m.id)) + 1;
+    const { data, error: insertError } = await supabase
+      .from('members')
+      .insert({ id: nextId, name, email: newMemberEmail.trim() || null, role: newMemberRole || 'Thành viên' })
+      .select('id,name,email,role')
+      .single();
+    if (insertError) return alert(insertError.message);
+    setMembers((old) => [...old, data as Member]);
+    setNewMemberName(''); setNewMemberEmail(''); setNewMemberRole('Thành viên');
+  }
+
+  async function updateFlowerImage(flowerId: number, file: File) {
+    if (!supabase || !isAdmin || !file) return;
+    const ext = file.name.split('.').pop() || 'png';
+    const path = `${flowerId}-${Date.now()}.${ext}`;
+    const { error: uploadError } = await supabase.storage.from('flower-images').upload(path, file, { upsert: true });
+    if (uploadError) return alert(uploadError.message);
+    const { data: pub } = supabase.storage.from('flower-images').getPublicUrl(path);
+    const imageUrl = pub.publicUrl;
+    const { error: updateError } = await supabase.from('flowers').update({ image_url: imageUrl }).eq('id', flowerId);
+    if (updateError) return alert(updateError.message);
+    setFlowers((old) => old.map((f) => f.id === flowerId ? { ...f, image_url: imageUrl } : f));
+  }
+
+  async function removeFlowerImage(flowerId: number) {
+    if (!supabase || !isAdmin) return;
+    const { error: updateError } = await supabase.from('flowers').update({ image_url: null }).eq('id', flowerId);
+    if (updateError) return alert(updateError.message);
+    setFlowers((old) => old.map((f) => f.id === flowerId ? { ...f, image_url: null } : f));
   }
 
   if (loading) {
@@ -188,7 +226,7 @@ export default function Home() {
         <div className="navlinks">
           <button className={tab === 'collection' ? 'active' : ''} onClick={() => setTab('collection')}><Flower2 /> Collection</button>
           <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}><UserRound /> Profile</button>
-          <button className={tab === 'admin' ? 'active' : ''} onClick={() => setTab('admin')}><LayoutGrid /> Admin</button>
+          {isAdmin && <button className={tab === 'admin' ? 'active' : ''} onClick={() => setTab('admin')}><LayoutGrid /> Admin</button>}
           <select value={current ?? ''} onChange={(e) => setCurrent(Number(e.target.value))}>
             {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
           </select>
@@ -203,7 +241,7 @@ export default function Home() {
               <h1><Flower2 /> RAPPIT HOUSE</h1>
               <p>Xin chào, <b>{me.name}</b> <span>{me.role}</span></p>
             </div>
-            <button className="add" onClick={() => setTab('admin')}><Plus /> Thêm hoa</button>
+            {isAdmin && <button className="add" onClick={() => setTab('admin')}><Plus /> Thêm hoa</button>}
           </header>
 
           <Stats total={total} joined={members.length} mine={myFlowerIds.size} />
@@ -263,18 +301,33 @@ export default function Home() {
 
       {tab === 'admin' && (
         <section className="page">
-          <h1>Admin quản lý hoa</h1>
-          <div className="admin">
-            <input placeholder="Nhập tên hoa mới..." value={newFlower} onChange={(e) => setNewFlower(e.target.value)} />
-            <button onClick={addFlower}><Plus /> Thêm hoa</button>
-          </div>
-          <p className="note">Dữ liệu đang lấy trực tiếp từ Supabase. Khi thành viên tích/xóa hoa, dữ liệu sẽ cập nhật online.</p>
-          {flowers.map((f) => (
-            <div className="row" key={f.id}>
-              <b>{f.image_url ? <img src={f.image_url} alt="" /> : <Flower2 />}</b>
-              <span>{f.name}<em>{ownersOf(f.id).length} thành viên đang sở hữu</em></span>
-            </div>
-          ))}
+          {!isAdmin ? (
+            <p className="note">Chỉ Bé Thỏ mới được vào Admin.</p>
+          ) : (
+            <>
+              <h1>Admin Bé Thỏ</h1>
+              <div className="admin block">
+                <input placeholder="Nhập tên hoa mới..." value={newFlower} onChange={(e) => setNewFlower(e.target.value)} />
+                <input placeholder="Loại/màu" value={newFlowerCategory} onChange={(e) => setNewFlowerCategory(e.target.value)} />
+                <button onClick={addFlower}><Plus /> Thêm hoa</button>
+              </div>
+              <div className="admin block">
+                <input placeholder="Tên thành viên mới..." value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)} />
+                <input placeholder="Email (có thể bỏ trống)" value={newMemberEmail} onChange={(e) => setNewMemberEmail(e.target.value)} />
+                <input placeholder="Chức vụ" value={newMemberRole} onChange={(e) => setNewMemberRole(e.target.value)} />
+                <button onClick={addMember}><Users /> Thêm member</button>
+              </div>
+              <p className="note">Bé Thỏ có thể thêm member, thêm hoa, upload ảnh mới hoặc xóa ảnh cũ.</p>
+              {flowers.map((f) => (
+                <div className="row adminRow" key={f.id}>
+                  <b>{f.image_url ? <img src={f.image_url} alt={f.name} /> : <Flower2 />}</b>
+                  <span>{f.name}<em>{f.category || 'Khác'} · {ownersOf(f.id).length} thành viên đang sở hữu</em></span>
+                  <label className="uploadBtn"><ImagePlus /> Upload ảnh<input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) updateFlowerImage(f.id, file); }} /></label>
+                  <button onClick={() => removeFlowerImage(f.id)}><Trash2 /> Xóa ảnh</button>
+                </div>
+              ))}
+            </>
+          )}
         </section>
       )}
     </main>
