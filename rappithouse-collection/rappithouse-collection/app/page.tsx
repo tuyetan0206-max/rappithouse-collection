@@ -95,7 +95,16 @@ export default function Home() {
   }, []);
 
   const me = members.find((m) => m.id === current) || members[0];
-  const isAdmin = me?.name?.includes('Bé Thỏ') || me?.id === 1;
+  const adminNames = [
+  'Bé Thỏ',
+  'Uniii',
+  'Chú Cuội',
+  'Nana Cute'
+];
+
+const isAdmin = adminNames.some(name =>
+  me?.name?.includes(name)
+);
   const total = flowers.length;
   const myClaims = claims.filter((c) => c.member_id === current);
   const myFlowerIds = new Set(myClaims.map((c) => c.flower_id));
@@ -228,8 +237,13 @@ export default function Home() {
           <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}><UserRound /> Profile</button>
           {isAdmin && <button className={tab === 'admin' ? 'active' : ''} onClick={() => setTab('admin')}><LayoutGrid /> Admin</button>}
           <select value={current ?? ''} onChange={(e) => setCurrent(Number(e.target.value))}>
-            {members.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-          </select>
+  {(me?.name?.includes('Bé Thỏ')
+    ? members
+    : members.filter((m) => !m.name.includes('Bé Thỏ'))
+  ).map((m) => (
+    <option key={m.id} value={m.id}>{m.name}</option>
+  ))}
+</select>
           <button onClick={loadData}><RotateCcw /> Tải lại</button>
         </div>
       </nav>
