@@ -157,3 +157,40 @@ body {
 * {
   font-family: "Times New Roman", Times, serif !important;
 }
+@media (max-width: 768px) {
+
+  .top {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .navlinks {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero h1 {
+    font-size: 42px !important;
+    line-height: 1.1;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  select {
+    width: 100%;
+    max-width: 100%;
+  }
+}
