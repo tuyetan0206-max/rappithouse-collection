@@ -194,3 +194,124 @@ body {
     max-width: 100%;
   }
 }
+/* FIX MOBILE: không cho menu đè chữ */
+@media (max-width: 768px) {
+  .top {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: unset !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+  }
+
+  .brand {
+    font-size: 22px !important;
+    line-height: 1.1 !important;
+  }
+
+  .navlinks {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .navlinks button,
+  .navlinks select {
+    width: 100% !important;
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+    height: 42px !important;
+    min-width: 0 !important;
+  }
+
+  .hero {
+    padding-top: 12px !important;
+  }
+
+  .hero h1 {
+    font-size: 34px !important;
+    line-height: 1.05 !important;
+  }
+
+  .hero p {
+    font-size: 16px !important;
+  }
+
+  .stats {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .stats div {
+    min-height: 70px !important;
+    padding: 12px !important;
+  }
+
+  .stats b {
+    font-size: 24px !important;
+  }
+
+  .filters {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .card {
+    border-radius: 14px !important;
+    overflow: hidden !important;
+  }
+
+  .card .pic {
+    height: 120px !important;
+  }
+
+  .card h3 {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
+
+  .card p,
+  .card li,
+  .card em,
+  .card button {
+    font-size: 11px !important;
+  }
+
+  .profile,
+  .columns,
+  .admin,
+  .admin.block,
+  .adminRow {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .adminRow {
+    padding: 10px !important;
+  }
+
+  .adminRow b,
+  .adminRow span,
+  .adminRow em {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+  }
+
+  .adminRow button,
+  .uploadBtn {
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+  }
+}
