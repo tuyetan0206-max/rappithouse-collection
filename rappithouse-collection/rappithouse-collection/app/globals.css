@@ -154,3 +154,6 @@ body {
   font-size: 14px !important;
   height: 46px !important;
 }
+* {
+  font-family: "Times New Roman", Times, serif !important;
+}
