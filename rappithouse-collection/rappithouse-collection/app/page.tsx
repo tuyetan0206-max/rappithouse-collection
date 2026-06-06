@@ -165,7 +165,7 @@ if (insertError) {
 }
 
 await loadData();
-
+}
   async function addFlower() {
     if (!supabase || !isAdmin) return;
     const name = newFlower.trim();
