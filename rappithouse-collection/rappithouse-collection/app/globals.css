@@ -91,3 +91,66 @@ input,
 select {
   font-size: 14px !important;
 }
+/* ÉP TOÀN BỘ GIAO DIỆN NHỎ LẠI */
+body {
+  font-size: 14px !important;
+}
+
+.page {
+  padding: 18px 22px !important;
+}
+
+.hero h1 {
+  font-size: 42px !important;
+}
+
+.stats b {
+  font-size: 28px !important;
+}
+
+.card h3 {
+  font-size: 14px !important;
+  line-height: 1.25 !important;
+  margin: 10px 0 !important;
+}
+
+.card p,
+.card li,
+.card em,
+.card span,
+.card button {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+.card .pic {
+  height: 150px !important;
+}
+
+.card .pic img {
+  max-width: 100% !important;
+  max-height: 140px !important;
+  object-fit: contain !important;
+}
+
+.grid {
+  grid-template-columns: repeat(5, minmax(180px, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.top {
+  height: 62px !important;
+  padding: 0 22px !important;
+}
+
+.navlinks button,
+.navlinks select {
+  font-size: 14px !important;
+  padding: 10px 14px !important;
+}
+
+.filters input,
+.filters select {
+  font-size: 14px !important;
+  height: 46px !important;
+}
