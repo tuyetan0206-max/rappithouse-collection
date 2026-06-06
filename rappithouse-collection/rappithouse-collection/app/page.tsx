@@ -154,7 +154,10 @@ const isAdmin = adminNames.some(name =>
 
     const { data, error: insertError } = await supabase
       .from('flower_claims')
-      .insert({ member_id: current, flower_id: flowerId, note: 'Đã có' })
+      .upsert(
+  { member_id: current, flower_id: flowerId, note: 'Đã có' },
+  { onConflict: 'flower_id,member_id' }
+)
       .select('id,flower_id,member_id,note')
       .single();
 
