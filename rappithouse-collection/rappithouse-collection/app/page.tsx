@@ -152,21 +152,19 @@ const isAdmin = adminNames.some(name =>
       return;
     }
 
-    const { data, error: insertError } = await supabase
-      .from('flower_claims')
-      .upsert(
-  { member_id: current, flower_id: flowerId, note: 'Đã có' },
-  { onConflict: 'flower_id,member_id' }
-)
-      .select('id,flower_id,member_id,note')
-      .single();
+    const { error: insertError } = await supabase
+  .from('flower_claims')
+  .upsert(
+    { member_id: current, flower_id: flowerId, note: 'Đã có' },
+    { onConflict: 'flower_id,member_id' }
+  );
 
-    if (insertError) {
-      alert(insertError.message);
-      return;
-    }
-    setClaims((old) => [...old, data as Claim]);
-  }
+if (insertError) {
+  alert(insertError.message);
+  return;
+}
+
+await loadData();
 
   async function addFlower() {
     if (!supabase || !isAdmin) return;
