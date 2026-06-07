@@ -108,6 +108,7 @@ setCurrent((old) => {
   'Nana Cute'
 ];
 
+const me = members.find((m) => Number(m.id) === Number(current)) || members[0];
 const isAdmin = adminNames.some(name =>
   me?.name?.includes(name)
 );
