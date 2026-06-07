@@ -86,7 +86,7 @@ export default function Home() {
     setMembers(memberData);
     setFlowers((flowersRes.data || []) as Flower[]);
     setClaims((claimsRes.data || []) as Claim[]);
-    setCurrent((old) => old ?? memberData[0]?.id ?? null);
+    setCurrent((old) => old ?? Number(localStorage.getItem('currentMember')) || memberData[0]?.id ?? null);
     console.log('members=', memberData);
     setLoading(false);
   }
@@ -95,7 +95,13 @@ export default function Home() {
     loadData();
   }, []);
 
-  const me = members.find((m) => m.id === current) || members[0];
+  setCurrent(
+  (old) =>
+    old ??
+    Number(localStorage.getItem('currentMember')) ||
+    memberData[0]?.id ||
+    null
+);
   const adminNames = [
   'Bé Thỏ',
   'Uniii',
@@ -168,7 +174,12 @@ async function toggleFlower(flowerId: number) {
     .eq('member_id', memberId)
     .eq('flower_id', fId)
     .maybeSingle();
-
+console.log('CHECK', {
+  memberId,
+  fid,
+  existing,
+  checkError
+});
   if (checkError) {
     alert(checkError.message);
     return;
@@ -190,13 +201,20 @@ async function toggleFlower(flowerId: number) {
     return;
   }
 
-  const { error: insertError } = await supabase
-    .from('flower_claims')
-    .insert({
-      member_id: memberId,
-      flower_id: fId,
-      note: 'Đã có'
-    });
+  console.log('INSERTING', {
+  member_id: memberId,
+  flower_id: fId
+});
+
+const { error: insertError } = await supabase
+  .from('flower_claims')
+  .insert({
+    member_id: memberId,
+    flower_id: fId,
+    note: 'Đã có'
+  });
+
+console.log('INSERT RESULT', insertError);
 
   if (insertError) {
     alert(insertError.message);
@@ -276,7 +294,14 @@ async function toggleFlower(flowerId: number) {
           <button className={tab === 'collection' ? 'active' : ''} onClick={() => setTab('collection')}><Flower2 /> Collection</button>
           <button className={tab === 'profile' ? 'active' : ''} onClick={() => setTab('profile')}><UserRound /> Profile</button>
           {isAdmin && <button className={tab === 'admin' ? 'active' : ''} onClick={() => setTab('admin')}><LayoutGrid /> Admin</button>}
-          <select value={current ?? ''} onChange={(e) => setCurrent(Number(e.target.value))}>
+          <select
+  value={current ?? ''}
+  onChange={(e) => {
+    const id = Number(e.target.value);
+    setCurrent(id);
+    localStorage.setItem('currentMember', String(id));
+  }}
+>
   {(me?.name?.includes('Bé Thỏ')
     ? members
     : members.filter((m) => !m.name.includes('Bé Thỏ'))
