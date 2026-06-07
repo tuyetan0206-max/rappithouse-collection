@@ -444,9 +444,26 @@ function FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; own
       <div className="pic">{f.image_url ? <img src={f.image_url} alt={f.name} /> : <span>{f.category === 'ĐỎ' ? '🌺' : '❀'}</span>}<i>{f.category || 'Khác'}</i></div>
       <h3>{f.name}</h3>
       <p><Users /> Thành viên ({owners.length})</p>
-      {owners.length ? <ul>{owners.slice(0, 8).map((o) => <li key={o.id}>{o.name} <em>— Đã có</em></li>)}</ul> : <em>Chưa có thành viên</em>}
-      <button className={mine ? 'ok' : 'join'} onClick={toggle}>{mine ? <CheckCircle2 /> : <Users />} {mine ? 'Đã tham gia / bấm để xóa' : 'Tích hoa này'}</button>
-    </article>
+
+{owners.length ? (
+  <ul>
+    {owners.slice(0, 8).map((o) => (
+      <li key={o.id}>
+        {o.name} <em>— Đã có</em>
+      </li>
+    ))}
+  </ul>
+) : (
+  <em>Chưa có thành viên</em>
+)}
+
+<button
+  className={mine ? 'ok' : 'join'}
+  onClick={toggle}
+>
+  {mine ? <CheckCircle2 /> : <Users />}
+  {mine ? 'Đã tham gia / bấm để xóa' : 'Tích hoa này'}
+</button>
   );
 }
 
