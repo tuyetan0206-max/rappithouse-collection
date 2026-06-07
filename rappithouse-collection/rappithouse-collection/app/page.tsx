@@ -220,7 +220,7 @@ const { data: newClaim, error: insertError } = await supabase!
 console.log('INSERT RESULT', insertError, newClaim);
 
   if (insertError) {
-    alert(insertError.message);
+    alert(insertError?.message || 'Lỗi thêm hoa');
     return;
   }
 if (newClaim) {
