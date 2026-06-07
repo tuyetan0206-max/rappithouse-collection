@@ -464,6 +464,8 @@ function FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; own
   {mine ? <CheckCircle2 /> : <Users />}
   {mine ? 'Đã tham gia / bấm để xóa' : 'Tích hoa này'}
 </button>
+
+</article>
   );
 }
 
