@@ -133,9 +133,15 @@ const isAdmin = adminNames.some(name =>
       .sort((a, b) => b.count - a.count);
   }, [members, claims, total]);
 
-  function ownersOf(flowerId: number) {
+ function ownersOf(flowerId: number): Member[] {
   const ownerIds = new Set(
     claims
+      .filter((c) => Number(c.flower_id) === Number(flowerId))
+      .map((c) => Number(c.member_id))
+  );
+
+  return members.filter((m) => ownerIds.has(Number(m.id)));
+}
       .filter((c) => Number(c.flower_id) === Number(flowerId))
       .map((c) => Number(c.member_id))
   );
