@@ -101,11 +101,6 @@ setCurrent((old) => {
     loadData();
   }, []);
 
-  const savedMember = Number(localStorage.getItem('currentMember'));
-
-setCurrent((old) =>
-  old ?? (savedMember || memberData[0]?.id || null)
-);
   const adminNames = [
   'Bé Thỏ',
   'Uniii',
