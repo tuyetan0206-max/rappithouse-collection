@@ -438,7 +438,7 @@ function Filters({ query, setQuery, type, setType, categories }: { query: string
   );
 }
 
-ffunction FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; owners: Member[]; toggle: () => void }) {
+function FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; owners: Member[]; toggle: () => void }) {
   return (
     <article className="card">
       <div className="pic">
