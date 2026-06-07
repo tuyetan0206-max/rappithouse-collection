@@ -206,22 +206,27 @@ console.log('CHECK', {
   flower_id: fId
 });
 
-const { error: insertError } = await supabase
+const { data: newClaim, error: insertError } = await supabase
   .from('flower_claims')
   .insert({
     member_id: memberId,
     flower_id: fId,
     note: 'Đã có'
-  });
+  })
+  .select('id, flower_id, member_id, note')
+  .single();
 
-console.log('INSERT RESULT', insertError);
+console.log('INSERT RESULT', insertError, newClaim);
 
   if (insertError) {
     alert(insertError.message);
     return;
   }
+if (newClaim) {
+  setClaims((old) => [...old, newClaim as Claim]);
+}
 
-  await loadData();
+return;
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
