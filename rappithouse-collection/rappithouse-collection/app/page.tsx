@@ -466,3 +466,4 @@ function FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; own
     </article>
   );
 }
+}
