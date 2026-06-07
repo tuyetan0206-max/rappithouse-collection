@@ -438,34 +438,31 @@ function Filters({ query, setQuery, type, setType, categories }: { query: string
   );
 }
 
-function FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; owners: Member[]; toggle: () => void }) {
+ffunction FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; owners: Member[]; toggle: () => void }) {
   return (
     <article className="card">
-      <div className="pic">{f.image_url ? <img src={f.image_url} alt={f.name} /> : <span>{f.category === 'ĐỎ' ? '🌺' : '❀'}</span>}<i>{f.category || 'Khác'}</i></div>
+      <div className="pic">
+        {f.image_url ? <img src={f.image_url} alt={f.name} /> : <span>{f.category === 'ĐỎ' ? '🌺' : '❀'}</span>}
+        <i>{f.category || 'Khác'}</i>
+      </div>
+
       <h3>{f.name}</h3>
       <p><Users /> Thành viên ({owners.length})</p>
 
-{owners.length ? (
-  <ul>
-    {owners.slice(0, 8).map((o) => (
-      <li key={o.id}>
-        {o.name} <em>— Đã có</em>
-      </li>
-    ))}
-  </ul>
-) : (
-  <em>Chưa có thành viên</em>
-)}
+      {owners.length ? (
+        <ul>
+          {owners.slice(0, 8).map((o) => (
+            <li key={o.id}>{o.name} <em>— Đã có</em></li>
+          ))}
+        </ul>
+      ) : (
+        <em>Chưa có thành viên</em>
+      )}
 
-<button
-  className={mine ? 'ok' : 'join'}
-  onClick={toggle}
->
-  {mine ? <CheckCircle2 /> : <Users />}
-  {mine ? 'Đã tham gia / bấm để xóa' : 'Tích hoa này'}
-</button>
-
-</article>
+      <button className={mine ? 'ok' : 'join'} onClick={toggle}>
+        {mine ? <CheckCircle2 /> : <Users />}
+        {mine ? 'Đã tham gia / bấm để xóa' : 'Tích hoa này'}
+      </button>
+    </article>
   );
-}
 }
