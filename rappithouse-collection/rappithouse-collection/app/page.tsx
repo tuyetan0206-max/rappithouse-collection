@@ -351,7 +351,7 @@ return;
             <div className="avatar">{me.name.includes('Bé') ? 'BÉ' : 'RH'}</div>
             <div><h2>{me.name}</h2><span>{me.role}</span></div>
             <div className="bigstat"><b>{myFlowerIds.size}</b><small>Hoa</small></div>
-            <div className="bigstat"><b>#{ranking.findIndex((r) => r.id === current) + 1}</b><small>Hạng</small></div>
+            <div className="bigstat"><b>#{ranking.findIndex((r) => Number(r.id) === Number(current)) + 1}</b><small>Hạng</small></div>
             <div className="bigstat"><b>{total ? Math.round((myFlowerIds.size / total) * 100) : 0}%</b><small>Đạt được</small></div>
             <label>Tiến trình sưu tập</label>
             <div className="bar"><i style={{ width: `${total ? (myFlowerIds.size / total) * 100 : 0}%` }} /></div>
@@ -361,7 +361,7 @@ return;
           <div className="columns">
             <section>
               <h2><Sparkles /> Hoa của tôi <small>{myFlowerIds.size}</small></h2>
-              {flowers.filter((f) => myFlowerIds.has(f.id)).map((f) => (
+              {flowers.filter((f) => myFlowerIds.has(Number(f.id))).map((f) => (
                 <div className="row" key={f.id}>
                   <b>{f.image_url ? <img src={f.image_url} alt="" /> : <Flower2 />}</b>
                   <span>{f.name}<em>{f.category} · Đã có</em></span>
