@@ -106,7 +106,7 @@ const isAdmin = adminNames.some(name =>
   me?.name?.includes(name)
 );
   const total = flowers.length;
-  const myClaims = claims.filter((c) => c.member_id === current);
+  const myClaims = claims.filter((c) => Number(c.member_id) === Number(current));
   const myFlowerIds = new Set(myClaims.map((c) => c.flower_id));
 
   const categories = useMemo(() => {
@@ -126,7 +126,7 @@ const isAdmin = adminNames.some(name =>
   const ranking = useMemo(() => {
     return members
       .map((m) => {
-        const count = claims.filter((c) => c.member_id === m.id).length;
+        const count = claims.filter((c) => Number(c.member_id) === Number(m.id)).length;
         const pct = total ? Math.round((count / total) * 100) : 0;
         return { ...m, count, pct };
       })
@@ -134,10 +134,18 @@ const isAdmin = adminNames.some(name =>
   }, [members, claims, total]);
 
   function ownersOf(flowerId: number) {
-    const ownerIds = new Set(claims.filter((c) => c.flower_id === flowerId).map((c) => c.member_id));
-    return members.filter((m) => ownerIds.has(m.id));
-  }
+  const ownerIds = new Set(
+    claims
+      .filter((c) => Number(c.flower_id) === Number(flowerId))
+      .map((c) => Number(c.member_id))
+  );
 
+  return members.filter((m) => ownerIds.has(Number(m.id)));
+const existed = claims.find(
+  (c) =>
+    Number(c.member_id) === Number(current) &&
+    Number(c.flower_id) === Number(flowerId)
+);
   async function toggleFlower(flowerId: number) {
   if (!supabase || !current) return;
 
