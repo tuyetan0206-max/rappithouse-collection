@@ -95,12 +95,10 @@ export default function Home() {
     loadData();
   }, []);
 
-  setCurrent(
-  (old) =>
-    old ??
-    Number(localStorage.getItem('currentMember')) ||
-    memberData[0]?.id ||
-    null
+  const savedMember = Number(localStorage.getItem('currentMember'));
+
+setCurrent((old) =>
+  old ?? (savedMember || memberData[0]?.id || null)
 );
   const adminNames = [
   'Bé Thỏ',
