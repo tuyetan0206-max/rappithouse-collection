@@ -159,21 +159,30 @@ function ownersOf(flowerId: number): Member[] {
 async function toggleFlower(flowerId: number) {
   if (!supabase || !current) return;
 
-  const existed = claims.find(
-    (c) =>
-      Number(c.member_id) === Number(current) &&
-      Number(c.flower_id) === Number(flowerId)
-  );
+  const memberId = Number(current);
+  const fId = Number(flowerId);
 
-  if (existed) {
-    const { error } = await supabase
+  const { data: existing, error: checkError } = await supabase
+    .from('flower_claims')
+    .select('id')
+    .eq('member_id', memberId)
+    .eq('flower_id', fId)
+    .maybeSingle();
+
+  if (checkError) {
+    alert(checkError.message);
+    return;
+  }
+
+  if (existing) {
+    const { error: deleteError } = await supabase
       .from('flower_claims')
       .delete()
-      .eq('member_id', current)
-      .eq('flower_id', flowerId);
+      .eq('member_id', memberId)
+      .eq('flower_id', fId);
 
-    if (error) {
-      alert(error.message);
+    if (deleteError) {
+      alert(deleteError.message);
       return;
     }
 
@@ -181,21 +190,16 @@ async function toggleFlower(flowerId: number) {
     return;
   }
 
-  const { error } = await supabase
+  const { error: insertError } = await supabase
     .from('flower_claims')
     .insert({
-      member_id: current,
-      flower_id: flowerId,
+      member_id: memberId,
+      flower_id: fId,
       note: 'Đã có'
     });
 
-  if (error) {
-    if ((error as any).code === '23505') {
-      await loadData();
-      return;
-    }
-
-    alert(error.message);
+  if (insertError) {
+    alert(insertError.message);
     return;
   }
 
