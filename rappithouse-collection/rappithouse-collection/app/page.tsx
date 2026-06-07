@@ -142,16 +142,6 @@ const isAdmin = adminNames.some(name =>
 
   return members.filter((m) => ownerIds.has(Number(m.id)));
 }
-      .filter((c) => Number(c.flower_id) === Number(flowerId))
-      .map((c) => Number(c.member_id))
-  );
-
-  return members.filter((m) => ownerIds.has(Number(m.id)));
-const existed = claims.find(
-  (c) =>
-    Number(c.member_id) === Number(current) &&
-    Number(c.flower_id) === Number(flowerId)
-);
   async function toggleFlower(flowerId: number) {
   if (!supabase || !current) return;
 
