@@ -196,10 +196,11 @@ console.log('CHECK', {
       alert(deleteError.message);
       return;
     }
+setClaims((old) =>
+  old.filter((c) => c.id !== existing.id)
+);
 
-    await loadData();
-    return;
-  }
+return;
 
   console.log('INSERTING', {
   member_id: memberId,
