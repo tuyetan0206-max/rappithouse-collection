@@ -87,6 +87,7 @@ export default function Home() {
     setFlowers((flowersRes.data || []) as Flower[]);
     setClaims((claimsRes.data || []) as Claim[]);
     setCurrent((old) => old ?? memberData[0]?.id ?? null);
+    console.log('members=', memberData);
     setLoading(false);
   }
 
@@ -113,6 +114,9 @@ const myClaims = claims.filter(
 
 const myFlowerIds = new Set(
   myClaims.map((c) => Number(c.flower_id))
+  console.log('current=', current);
+console.log('myClaims=', myClaims);
+console.log('myFlowerIds=', [...myFlowerIds]);
 );
 
 const categories = useMemo(() => {
@@ -297,7 +301,7 @@ async function toggleFlower(flowerId: number) {
               <FlowerCard
                 key={f.id}
                 f={f}
-                mine={myFlowerIds.has(f.id)}
+                mine={myFlowerIds.has(Number(f.id))}
                 owners={ownersOf(f.id)}
                 toggle={() => toggleFlower(f.id)}
               />
