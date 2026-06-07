@@ -106,34 +106,42 @@ const isAdmin = adminNames.some(name =>
   me?.name?.includes(name)
 );
   const total = flowers.length;
-  const myClaims = claims.filter((c) => Number(c.member_id) === Number(current));
-  const myFlowerIds = new Set(myClaims.map((c) => c.flower_id));
 
-  const categories = useMemo(() => {
-    const arr = flowers.map((f) => f.category || 'Khác').filter(Boolean);
-    return ['Tất cả loại', ...Array.from(new Set(arr))];
-  }, [flowers]);
+const myClaims = claims.filter(
+  (c) => Number(c.member_id) === Number(current)
+);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return flowers.filter((f) => {
-      const okType = type === 'Tất cả loại' || (f.category || 'Khác') === type;
-      const okSearch = !q || f.name.toLowerCase().includes(q);
-      return okType && okSearch;
-    });
-  }, [flowers, query, type]);
+const myFlowerIds = new Set(
+  myClaims.map((c) => Number(c.flower_id))
+);
 
-  const ranking = useMemo(() => {
-    return members
-      .map((m) => {
-        const count = claims.filter((c) => Number(c.member_id) === Number(m.id)).length;
-        const pct = total ? Math.round((count / total) * 100) : 0;
-        return { ...m, count, pct };
-      })
-      .sort((a, b) => b.count - a.count);
-  }, [members, claims, total]);
+const categories = useMemo(() => {
+  const arr = flowers.map((f) => f.category || 'Khác').filter(Boolean);
+  return ['Tất cả loại', ...Array.from(new Set(arr))];
+}, [flowers]);
 
- function ownersOf(flowerId: number): Member[] {
+const filtered = useMemo(() => {
+  const q = query.trim().toLowerCase();
+  return flowers.filter((f) => {
+    const okType = type === 'Tất cả loại' || (f.category || 'Khác') === type;
+    const okSearch = !q || f.name.toLowerCase().includes(q);
+    return okType && okSearch;
+  });
+}, [flowers, query, type]);
+
+const ranking = useMemo(() => {
+  return members
+    .map((m) => {
+      const count = claims.filter(
+        (c) => Number(c.member_id) === Number(m.id)
+      ).length;
+      const pct = total ? Math.round((count / total) * 100) : 0;
+      return { ...m, count, pct };
+    })
+    .sort((a, b) => b.count - a.count);
+}, [members, claims, total]);
+
+function ownersOf(flowerId: number): Member[] {
   const ownerIds = new Set(
     claims
       .filter((c) => Number(c.flower_id) === Number(flowerId))
@@ -142,11 +150,14 @@ const isAdmin = adminNames.some(name =>
 
   return members.filter((m) => ownerIds.has(Number(m.id)));
 }
-  async function toggleFlower(flowerId: number) {
+
+async function toggleFlower(flowerId: number) {
   if (!supabase || !current) return;
 
   const existed = claims.find(
-    (c) => c.member_id === current && c.flower_id === flowerId
+    (c) =>
+      Number(c.member_id) === Number(current) &&
+      Number(c.flower_id) === Number(flowerId)
   );
 
   if (existed) {
