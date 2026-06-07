@@ -114,10 +114,11 @@ const myClaims = claims.filter(
 
 const myFlowerIds = new Set(
   myClaims.map((c) => Number(c.flower_id))
-  console.log('current=', current);
+);
+
+console.log('current=', current);
 console.log('myClaims=', myClaims);
 console.log('myFlowerIds=', [...myFlowerIds]);
-);
 
 const categories = useMemo(() => {
   const arr = flowers.map((f) => f.category || 'Khác').filter(Boolean);
