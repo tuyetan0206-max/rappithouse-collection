@@ -170,6 +170,11 @@ const isAdmin = adminNames.some(name =>
     });
 
   if (error) {
+    if ((error as any).code === '23505') {
+      await loadData();
+      return;
+    }
+
     alert(error.message);
     return;
   }
