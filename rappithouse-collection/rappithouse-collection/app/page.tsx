@@ -139,32 +139,42 @@ const isAdmin = adminNames.some(name =>
   }
 
   async function toggleFlower(flowerId: number) {
-    if (!supabase || !current) return;
-    const existed = claims.find((c) => c.member_id === current && c.flower_id === flowerId);
+  if (!supabase || !current) return;
 
-    if (existed) {
-      const { error: deleteError } = await supabase.from('flower_claims').delete().eq('id', existed.id);
-      if (deleteError) {
-        alert(deleteError.message);
-        return;
-      }
-      setClaims((old) => old.filter((c) => c.id !== existed.id));
+  const existed = claims.find(
+    (c) => c.member_id === current && c.flower_id === flowerId
+  );
+
+  if (existed) {
+    const { error } = await supabase
+      .from('flower_claims')
+      .delete()
+      .eq('member_id', current)
+      .eq('flower_id', flowerId);
+
+    if (error) {
+      alert(error.message);
       return;
     }
 
-    const { error: insertError } = await supabase
-  .from('flower_claims')
-  .upsert(
-    { member_id: current, flower_id: flowerId, note: 'Đã có' },
-    { onConflict: 'flower_id,member_id' }
-  );
+    await loadData();
+    return;
+  }
 
-if (insertError) {
-  alert(insertError.message);
-  return;
-}
+  const { error } = await supabase
+    .from('flower_claims')
+    .insert({
+      member_id: current,
+      flower_id: flowerId,
+      note: 'Đã có'
+    });
 
-await loadData();
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadData();
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
