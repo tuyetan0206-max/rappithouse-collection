@@ -207,7 +207,7 @@ return;
   flower_id: fId
 });
 
-const { data: newClaim, error: insertError } = await supabase
+const { data: newClaim, error: insertError } = await supabase!
   .from('flower_claims')
   .insert({
     member_id: memberId,
