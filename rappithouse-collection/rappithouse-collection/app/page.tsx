@@ -86,7 +86,13 @@ export default function Home() {
     setMembers(memberData);
     setFlowers((flowersRes.data || []) as Flower[]);
     setClaims((claimsRes.data || []) as Claim[]);
-    setCurrent((old) => old ?? Number(localStorage.getItem('currentMember')) || memberData[0]?.id ?? null);
+    const savedMember = Number(localStorage.getItem('currentMember'));
+
+setCurrent((old) => {
+  if (old) return old;
+  if (savedMember) return savedMember;
+  return memberData[0]?.id || null;
+});
     console.log('members=', memberData);
     setLoading(false);
   }
