@@ -89,9 +89,19 @@ export default function Home() {
     const savedMember = Number(localStorage.getItem('currentMember'));
 
 setCurrent((old) => {
-  if (old) return old;
-  if (savedMember) return savedMember;
-  return memberData[0]?.id || null;
+  const validOld = memberData.some(
+    (m) => Number(m.id) === Number(old)
+  );
+
+  if (old && validOld) return old;
+
+  const validSaved = memberData.some(
+    (m) => Number(m.id) === Number(savedMember)
+  );
+
+  if (savedMember && validSaved) return savedMember;
+
+  return memberData[0]?.id ?? null;
 });
     console.log('members=', memberData);
     setLoading(false);
@@ -178,23 +188,40 @@ async function refreshClaims() {
   setClaims((data || []) as Claim[]);
 }
 
+  async function refreshClaims() {
+  if (!supabase) return;
+
+  const { data, error } = await supabase
+    .from('flower_claims')
+    .select('id,flower_id,member_id,note')
+    .order('id', { ascending: true });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  setClaims((data || []) as Claim[]);
+}
 async function toggleFlower(flowerId: number) {
   if (!supabase || current === null) return;
 
   const memberId = Number(current);
   const fId = Number(flowerId);
 
-  const { data: existing, error: checkError } = await supabase
+  const { data: existingRows, error: checkError } = await supabase
     .from('flower_claims')
     .select('id')
     .eq('member_id', memberId)
     .eq('flower_id', fId)
-    .maybeSingle();
+    .limit(1);
 
   if (checkError) {
     alert(checkError.message);
     return;
   }
+
+  const existing = existingRows?.[0];
 
   if (existing) {
     const { error: deleteError } = await supabase
@@ -211,7 +238,7 @@ async function toggleFlower(flowerId: number) {
     return;
   }
 
-  const { error: upsertError } = await supabase
+  const { error: insertError } = await supabase
     .from('flower_claims')
     .upsert(
       {
@@ -222,8 +249,8 @@ async function toggleFlower(flowerId: number) {
       { onConflict: 'flower_id,member_id' }
     );
 
-  if (upsertError) {
-    alert(upsertError.message);
+  if (insertError) {
+    alert(insertError.message);
     return;
   }
 
