@@ -174,12 +174,7 @@ async function toggleFlower(flowerId: number) {
     .eq('member_id', memberId)
     .eq('flower_id', fId)
     .maybeSingle();
-console.log('CHECK', {
-  memberId,
-  fId,
-  existing,
-  checkError
-});
+
   if (checkError) {
     alert(checkError.message);
     return;
@@ -189,45 +184,35 @@ console.log('CHECK', {
     const { error: deleteError } = await supabase
       .from('flower_claims')
       .delete()
-      .eq('member_id', memberId)
-      .eq('flower_id', fId);
+      .eq('id', existing.id);
 
     if (deleteError) {
       alert(deleteError.message);
       return;
     }
-setClaims((old) =>
-  old.filter((c) => c.id !== existing.id)
-);
 
-return;
-
-  console.log('INSERTING', {
-  member_id: memberId,
-  flower_id: fId
-});
-
-const { data: newClaim, error: insertError } = await supabase!
-  .from('flower_claims')
-  .insert({
-    member_id: memberId,
-    flower_id: fId,
-    note: 'Đã có'
-  })
-  .select('id, flower_id, member_id, note')
-  .single();
-
-console.log('INSERT RESULT', insertError, newClaim);
-
-  if (insertError) {
-    alert(insertError?.message || 'Lỗi thêm hoa');
+    setClaims((old) => old.filter((c) => c.id !== existing.id));
     return;
   }
-if (newClaim) {
-  setClaims((old) => [...old, newClaim as Claim]);
-}
 
-return;
+  const { data: newClaim, error: insertError } = await supabase
+    .from('flower_claims')
+    .insert({
+      member_id: memberId,
+      flower_id: fId,
+      note: 'Đã có'
+    })
+    .select('id,flower_id,member_id,note')
+    .single();
+
+  if (insertError) {
+    alert(insertError.message);
+    return;
+  }
+
+  if (newClaim) {
+    setClaims((old) => [...old, newClaim as Claim]);
+  }
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
@@ -465,5 +450,4 @@ function FlowerCard({ f, mine, owners, toggle }: { f: Flower; mine: boolean; own
       </button>
     </article>
   );
-}
 }
