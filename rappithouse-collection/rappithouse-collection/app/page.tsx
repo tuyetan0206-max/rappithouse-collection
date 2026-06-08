@@ -172,22 +172,6 @@ function ownersOf(flowerId: number): Member[] {
   return members.filter((m) => ownerIds.has(Number(m.id)));
 }
 
-async function refreshClaims() {
-  if (!supabase) return;
-
-  const { data, error } = await supabase
-    .from('flower_claims')
-    .select('id,flower_id,member_id,note')
-    .order('id', { ascending: true });
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  setClaims((data || []) as Claim[]);
-}
-
   async function refreshClaims() {
   if (!supabase) return;
 
