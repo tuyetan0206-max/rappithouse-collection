@@ -162,8 +162,24 @@ function ownersOf(flowerId: number): Member[] {
   return members.filter((m) => ownerIds.has(Number(m.id)));
 }
 
+async function refreshClaims() {
+  if (!supabase) return;
+
+  const { data, error } = await supabase
+    .from('flower_claims')
+    .select('id,flower_id,member_id,note')
+    .order('id', { ascending: true });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  setClaims((data || []) as Claim[]);
+}
+
 async function toggleFlower(flowerId: number) {
-  if (!supabase || !current) return;
+  if (!supabase || current === null) return;
 
   const memberId = Number(current);
   const fId = Number(flowerId);
@@ -191,27 +207,27 @@ async function toggleFlower(flowerId: number) {
       return;
     }
 
-    await loadData();
+    await refreshClaims();
     return;
   }
 
-  const { error: insertError } = await supabase
+  const { error: upsertError } = await supabase
     .from('flower_claims')
     .upsert(
       {
-        member_id: memberId,
         flower_id: fId,
+        member_id: memberId,
         note: 'Đã có'
       },
       { onConflict: 'flower_id,member_id' }
     );
 
-  if (insertError) {
-    alert(insertError.message);
+  if (upsertError) {
+    alert(upsertError.message);
     return;
   }
 
-  await loadData();
+  await refreshClaims();
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
