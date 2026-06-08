@@ -168,34 +168,26 @@ async function toggleFlower(flowerId: number) {
   const memberId = Number(current);
   const fId = Number(flowerId);
 
-  const { data: existing, error: checkError } = await supabase
-    .from('flower_claims')
-    .select('id')
-    .eq('member_id', memberId)
-    .eq('flower_id', fId)
-    .maybeSingle();
+  const existed = claims.find(
+    (c) => Number(c.member_id) === memberId && Number(c.flower_id) === fId
+  );
 
-  if (checkError) {
-    alert(checkError.message);
-    return;
-  }
-
-  if (existing) {
-    const { error: deleteError } = await supabase
+  if (existed) {
+    const { error } = await supabase
       .from('flower_claims')
       .delete()
-      .eq('id', existing.id);
+      .eq('id', existed.id);
 
-    if (deleteError) {
-      alert(deleteError.message);
+    if (error) {
+      alert(error.message);
       return;
     }
 
-    setClaims((old) => old.filter((c) => c.id !== existing.id));
+    setClaims((old) => old.filter((c) => c.id !== existed.id));
     return;
   }
 
-  const { data: newClaim, error: insertError } = await supabase
+  const { data, error } = await supabase
     .from('flower_claims')
     .insert({
       member_id: memberId,
@@ -205,16 +197,12 @@ async function toggleFlower(flowerId: number) {
     .select('id,flower_id,member_id,note')
     .single();
 
-  if (insertError) {
-    alert(insertError.message);
+  if (error) {
+    alert(error.message);
     return;
   }
 
-  if (newClaim) {
-    setClaims((old) => [...old, newClaim as Claim]);
-  }
-  await loadData();
-  return;
+  setClaims((old) => [...old, data as Claim]);
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
