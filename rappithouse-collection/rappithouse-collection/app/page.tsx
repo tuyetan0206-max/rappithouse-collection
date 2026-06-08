@@ -213,6 +213,8 @@ async function toggleFlower(flowerId: number) {
   if (newClaim) {
     setClaims((old) => [...old, newClaim as Claim]);
   }
+  await loadData();
+  return;
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
