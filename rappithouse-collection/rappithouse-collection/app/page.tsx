@@ -168,52 +168,51 @@ async function toggleFlower(flowerId: number) {
   const memberId = Number(current);
   const fId = Number(flowerId);
 
-  const existed = claims.find(
-    (c) => Number(c.member_id) === memberId && Number(c.flower_id) === fId
-  );
+  const { data: existing, error: checkError } = await supabase
+    .from('flower_claims')
+    .select('id')
+    .eq('member_id', memberId)
+    .eq('flower_id', fId)
+    .maybeSingle();
 
-  if (existed) {
-    const { error } = await supabase
+  if (checkError) {
+    alert(checkError.message);
+    return;
+  }
+
+  if (existing) {
+    const { error: deleteError } = await supabase
       .from('flower_claims')
       .delete()
-      .eq('id', existed.id);
+      .eq('id', existing.id);
 
-    if (error) {
-      alert(error.message);
+    if (deleteError) {
+      alert(deleteError.message);
       return;
     }
 
-    setClaims((old) => old.filter((c) => c.id !== existed.id));
+    await loadData();
     return;
   }
 
-  const { data, error } = await supabase
-  .from('flower_claims')
-  .upsert(
-    {
-      member_id: memberId,
-      flower_id: fId,
-      note: 'Đã có'
-    },
-    { onConflict: 'flower_id,member_id' }
-  )
-  .select('id,flower_id,member_id,note')
-  .single();
+  const { error: insertError } = await supabase
+    .from('flower_claims')
+    .upsert(
+      {
+        member_id: memberId,
+        flower_id: fId,
+        note: 'Đã có'
+      },
+      { onConflict: 'flower_id,member_id' }
+    );
 
-  if (error) {
-    alert(error.message);
+  if (insertError) {
+    alert(insertError.message);
     return;
   }
 
-  setClaims((old) => {
-  const exists = old.some(
-    (c) => Number(c.member_id) === memberId && Number(c.flower_id) === fId
-  );
-
-  if (exists) return old;
-
-  return [...old, data as Claim];
-});
+  await loadData();
+}
   async function addFlower() {
     if (!supabase || !isAdmin) return;
     const name = newFlower.trim();
