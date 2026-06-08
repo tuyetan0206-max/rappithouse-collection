@@ -188,22 +188,32 @@ async function toggleFlower(flowerId: number) {
   }
 
   const { data, error } = await supabase
-    .from('flower_claims')
-    .insert({
+  .from('flower_claims')
+  .upsert(
+    {
       member_id: memberId,
       flower_id: fId,
       note: 'Đã có'
-    })
-    .select('id,flower_id,member_id,note')
-    .single();
+    },
+    { onConflict: 'flower_id,member_id' }
+  )
+  .select('id,flower_id,member_id,note')
+  .single();
 
   if (error) {
     alert(error.message);
     return;
   }
 
-  setClaims((old) => [...old, data as Claim]);
-}
+  setClaims((old) => {
+  const exists = old.some(
+    (c) => Number(c.member_id) === memberId && Number(c.flower_id) === fId
+  );
+
+  if (exists) return old;
+
+  return [...old, data as Claim];
+});
   async function addFlower() {
     if (!supabase || !isAdmin) return;
     const name = newFlower.trim();
