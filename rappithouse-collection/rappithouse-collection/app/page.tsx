@@ -193,52 +193,55 @@ async function toggleFlower(flowerId: number) {
   const memberId = Number(current);
   const fId = Number(flowerId);
 
-  const { data: existingRows, error: checkError } = await supabase
+  const { data: rows, error: checkError } = await supabase
     .from('flower_claims')
-    .select('id')
+    .select('id,flower_id,member_id,note')
     .eq('member_id', memberId)
-    .eq('flower_id', fId)
-    .limit(1);
+    .eq('flower_id', fId);
 
   if (checkError) {
     alert(checkError.message);
     return;
   }
 
-  const existing = existingRows?.[0];
-
-  if (existing) {
+  if (rows && rows.length > 0) {
     const { error: deleteError } = await supabase
       .from('flower_claims')
       .delete()
-      .eq('id', existing.id);
+      .eq('member_id', memberId)
+      .eq('flower_id', fId);
 
     if (deleteError) {
       alert(deleteError.message);
       return;
     }
 
-    await refreshClaims();
+    setClaims((old) =>
+      old.filter(
+        (c) =>
+          !(Number(c.member_id) === memberId && Number(c.flower_id) === fId)
+      )
+    );
+
     return;
   }
 
-  const { error: insertError } = await supabase
+  const { data: newClaim, error: insertError } = await supabase
     .from('flower_claims')
-    .upsert(
-      {
-        flower_id: fId,
-        member_id: memberId,
-        note: 'Đã có'
-      },
-      { onConflict: 'flower_id,member_id' }
-    );
+    .insert({
+      flower_id: fId,
+      member_id: memberId,
+      note: 'Đã có'
+    })
+    .select('id,flower_id,member_id,note')
+    .single();
 
   if (insertError) {
     alert(insertError.message);
     return;
   }
 
-  await refreshClaims();
+  setClaims((old) => [...old, newClaim as Claim]);
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
