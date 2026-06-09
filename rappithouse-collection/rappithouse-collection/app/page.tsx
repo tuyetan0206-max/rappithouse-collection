@@ -71,11 +71,7 @@ export default function Home() {
     const [membersRes, flowersRes, claimsRes] = await Promise.all([
       supabase.from('members').select('id,name,email,role').order('id', { ascending: true }),
       supabase.from('flowers').select('id,name,image_url,category,status').order('id', { ascending: true }),
-      supabase
-  .from('flower_claims')
-  .select('id,flower_id,member_id,note')
-  .order('id', { ascending: true })
-  .range(0, 9999),
+      supabase.rpc('get_all_flower_claims'),
     ]);
 
     if (membersRes.error || flowersRes.error || claimsRes.error) {
@@ -179,11 +175,7 @@ function ownersOf(flowerId: number): Member[] {
   async function refreshClaims() {
   if (!supabase) return;
 
-  const { data, error } = await supabase
-  .from('flower_claims')
-  .select('id,flower_id,member_id,note')
-  .order('id', { ascending: true })
-  .range(0, 9999);
+  const { data, error } = await supabase.rpc('get_all_flower_claims');
 
   if (error) {
     alert(error.message);
