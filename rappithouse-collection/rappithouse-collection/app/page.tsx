@@ -195,58 +195,17 @@ function ownersOf(flowerId: number): Member[] {
 async function toggleFlower(flowerId: number) {
   if (!supabase || current === null) return;
 
-  const memberId = Number(current);
-  const fId = Number(flowerId);
+  const { data, error } = await supabase.rpc('toggle_flower_claim', {
+    p_member_id: Number(current),
+    p_flower_id: Number(flowerId)
+  });
 
-  const { data: rows, error: checkError } = await supabase
-    .from('flower_claims')
-    .select('id,flower_id,member_id,note')
-    .eq('member_id', memberId)
-    .eq('flower_id', fId);
-
-  if (checkError) {
-    alert(checkError.message);
+  if (error) {
+    alert(error.message);
     return;
   }
 
-  if (rows && rows.length > 0) {
-    const { error: deleteError } = await supabase
-      .from('flower_claims')
-      .delete()
-      .eq('member_id', memberId)
-      .eq('flower_id', fId);
-
-    if (deleteError) {
-      alert(deleteError.message);
-      return;
-    }
-
-    setClaims((old) =>
-      old.filter(
-        (c) =>
-          !(Number(c.member_id) === memberId && Number(c.flower_id) === fId)
-      )
-    );
-
-    return;
-  }
-
-  const { data: newClaim, error: insertError } = await supabase
-    .from('flower_claims')
-    .insert({
-      flower_id: fId,
-      member_id: memberId,
-      note: 'Đã có'
-    })
-    .select('id,flower_id,member_id,note')
-    .single();
-
-  if (insertError) {
-    alert(insertError.message);
-    return;
-  }
-
-  setClaims((old) => [...old, newClaim as Claim]);
+  setClaims((data || []) as Claim[]);
 }
   async function addFlower() {
     if (!supabase || !isAdmin) return;
